@@ -28,13 +28,24 @@ export const register = async (req, res) => {
       [username, email, hashed]
     );
 
+    const userId = result.insertId;
     const token = generateToken({
-      id: result.insertId,
+      id: userId,
+      username,
       email,
     });
 
-    res.status(201).json({ token });
+    res.status(201).json({
+      success: true,
+      token,
+      user: {
+        id: userId,
+        username,
+        email,
+      },
+    });
   } catch (error) {
+    console.error("Registration error:", error);
     res.status(500).json({ message: "Registration failed" });
   }
 };
@@ -65,10 +76,23 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = generateToken(user);
+    const token = generateToken({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+    });
 
-    res.json({ token });
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
+    });
   } catch (error) {
+    console.error("Login error:", error);
     res.status(500).json({ message: "Login failed" });
   }
 };
